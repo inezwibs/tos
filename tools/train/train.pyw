@@ -1327,7 +1327,7 @@ try:
         print 'com1 not configured properly'
         throw
 except:
-    inet = "localhost:8888"
+    inet = "localhost:8880"
     
 random.seed()
 

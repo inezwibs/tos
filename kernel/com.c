@@ -41,13 +41,13 @@ void com_reader_process (PROCESS self, PARAM param)
     
     reply_port = (PORT) param;
     while (1) {
-	msg = (COM_Message*) receive (&sender_proc);
-	i = 0;
-	while (i != msg->len_input_buffer) {
-	    wait_for_interrupt (COM1_IRQ);
-	    msg->input_buffer[i++] = inportb (COM1_PORT);
-	}
-	message (reply_port, &msg);
+    	msg = (COM_Message*) receive (&sender_proc);
+    	i = 0;
+    	while (i != msg->len_input_buffer) {
+    	    wait_for_interrupt (COM1_IRQ);
+    	    msg->input_buffer[i++] = inportb (COM1_PORT);
+    	}
+    	message (reply_port, &msg);
     }
 }
 
@@ -55,12 +55,12 @@ void com_reader_process (PROCESS self, PARAM param)
 void send_cmd_to_com (char* cmd)
 {
     while (*cmd != '\0') {
-	/*
-	 * Wait for the UART to accept the next byte
-	 */
-	while (!(inportb (COM1_PORT + 5) & (1 << 5))) ;
-        outportb (COM1_PORT, *cmd);
-	cmd++;
+    	/*
+    	 * Wait for the UART to accept the next byte
+    	 */
+    	while (!(inportb (COM1_PORT + 5) & (1 << 5))) ;
+            outportb (COM1_PORT, *cmd);
+    	cmd++;
     }
 }
 
@@ -77,12 +77,12 @@ void com_process (PROCESS self, PARAM param)
 				      (PARAM) self->first_port, "COM reader");
     
     while (42) {
-	msg = (COM_Message*) receive (&sender_proc);
-	message (com_reader_port, msg);
-	send_cmd_to_com (msg->output_buffer);
-	receive (&recv_proc);
-	/*assert (recv_proc == com_reader_proc);*/
-	reply (sender_proc);
+    	msg = (COM_Message*) receive (&sender_proc);
+    	message (com_reader_port, msg);
+    	send_cmd_to_com (msg->output_buffer);
+    	receive (&recv_proc);
+    	/*assert (recv_proc == com_reader_proc);*/
+    	reply (sender_proc);
     }
 }
 
@@ -91,5 +91,4 @@ void init_com ()
 {
     init_uart();
     com_port = create_process (com_process, 6, 0, "COM process");
-    resign();
 }

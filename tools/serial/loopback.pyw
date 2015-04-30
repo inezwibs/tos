@@ -134,7 +134,7 @@ try:
         print 'com1 not configured properly'
         throw
 except:
-    inet = "localhost:8888"
+    inet = "localhost:8880"
 
 thread.start_new (read_data_from_socket, (log_window, inet))
 mainloop()

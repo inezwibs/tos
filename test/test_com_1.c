@@ -21,11 +21,10 @@ void test_com_1()
     kprintf("You need to run 'loopback.pyw' before you run this test.");
 
     char buffer[13];
-   /* uses 12 char for "Hello World!" and an extra char '\0'
+    /* uses 12 char for "Hello World!" and an extra char '\0'
       to indicate the end of the string */
 
-    COM_Message msg;
-    int         i;
+    COM_Message msg;    
     
     test_reset();
     init_interrupts();
@@ -42,8 +41,9 @@ void test_com_1()
     
     send(com_port, &msg);
     
+    int i;
     for (i = 0; i < 12; i++)
-	kprintf("%c", buffer[i]);
+	    kprintf("%c", buffer[i]);
     kprintf("\n");
 
     buffer[12] = '\0';  // to make it a C string

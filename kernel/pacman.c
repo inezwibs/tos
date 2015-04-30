@@ -86,14 +86,14 @@ void draw_maze()
     clear_window(pacman_wnd);
     y = 0;
     while (maze[y] != NULL) {
-	char* row = maze[y];
-	x = 0;
-	while (row[x] != '\0') {
-	    char ch = row[x];
-	    draw_maze_char(ch);
-	    x++;
-	}
-	y++;
+	   char* row = maze[y];
+	   x = 0;
+	   while (row[x] != '\0') {
+	       char ch = row[x];
+	       draw_maze_char(ch);
+	       x++;
+	   }
+	   y++;
     }
     wprintf(pacman_wnd, "PacMan ");
 }
@@ -174,9 +174,10 @@ void create_new_ghost()
     choose_random_direction(&dx, &dy);
     
     while (1) {
-	sleep(10);
-	while (move_ghost(&ghost, dx, dy) == FALSE)
-	    choose_random_direction(&dx, &dy);
+	    sleep(10);
+	    while (move_ghost(&ghost, dx, dy) == FALSE) {
+	        choose_random_direction(&dx, &dy);
+        }
     }
 }
 
@@ -197,8 +198,9 @@ void init_pacman(WINDOW* wnd, int num_ghosts)
     draw_maze();
 
     int i;
-    for (i = 0; i < num_ghosts; i++)
-	create_process(ghost_proc, 3, 0, "Ghost");
+    for (i = 0; i < num_ghosts; i++) {
+        create_process(ghost_proc, 3, 0, "Ghost");
+    }
     return;
 }
 
