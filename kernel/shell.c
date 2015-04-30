@@ -5,8 +5,11 @@ WINDOW pac_wnd = {61, 9, 61, 16, 0, 0, 0xDC};
 WINDOW train_wnd = {35, 0, 40, 8, 0, 0, ' '};
 
 #define MAX_CMD_LENGTH 32
+#define MAX_CMD_PARAM_LENGTH 5
 char current_cmd[MAX_CMD_LENGTH];
+char cmd_param[MAX_CMD_PARAM_LENGTH];
 int cmd_size = 0;
+int cmd_param_size = 0;
 
 /*Command codes*/
 #define SHELL_CMD_EMPTY   0
@@ -25,7 +28,7 @@ int cmd_size = 0;
 
 const char* cmd_table[] = {
 	"help", "clear", "ps", "train", "tstop", 
-	"tgo", "tpos","tdir", "pac", "about"
+	"tgo", "ts","tdir", "pac", "about"
 };
 
 /********************* utils functions ***********************/
@@ -38,7 +41,7 @@ void print_helpers(WINDOW* wnd) {
 	wprintf(wnd, "train : start train application\n");
 	wprintf(wnd, "tstop : stop train\n");
 	wprintf(wnd, "tgo   : start train\n");
-	wprintf(wnd, "tpos  : change positions of switches\n");
+	wprintf(wnd, "ts    : get the status of a contact\n");
 	wprintf(wnd, "tdir  : toggle direction of the train\n");
 	wprintf(wnd, "pac   : start pacman game\n");
 	wprintf(wnd, "about : show about\n");
@@ -52,7 +55,8 @@ void print_head(WINDOW* wnd) {
 	wprintf(wnd, "   |_| \\___/|___/            |\n");
 	wprintf(wnd, "                             |\n");
 
-	wprintf(wnd, "Welcome to TOS shell window! |\nType 'help' to get helps.    |\n");       
+	wprintf(wnd, "Welcome to TOS shell window! |\n");
+	wprintf(wnd, "Type 'help' to get helps.    |\n");       
 	wprintf(wnd, "------------------------------\n");                 
 }
 
@@ -85,8 +89,22 @@ void cmd_tgo() {
 	train_command("L20S5");
 }
 
-void cmd_tpos() {
-	wprintf(&shell_wnd, "not implemented yet\n");
+void cmd_ts() {
+	if(cmd_param_size != 1 && cmd_param_size != 2) {
+		wprintf(&shell_wnd, "Invalid parameter!\n");
+		return;
+	}
+	int nb = 0;
+	nb = cmd_param[0] - '0';
+	if (cmd_param_size == 2) {
+		nb = nb * 10 + cmd_param[1] - '0';
+	}
+	if(nb > 15 || nb <= 0) {
+		wprintf(&shell_wnd, "Invalid parameter!\n");
+		return;
+	}
+	BOOL ret = probe(nb);
+	wprintf(&shell_wnd, "%s %d.\n", ret ? "On contact" : "Not on contact", nb);
 }
 
 void cmd_tdir() {
@@ -110,7 +128,7 @@ typedef void (*cmd_func)();
 cmd_func cmd_functions[] = {
 	cmd_empty, cmd_help, cmd_clear, 
 	cmd_ps, cmd_train, cmd_tstop, cmd_tgo, 
-	cmd_tpos, cmd_tdir, cmd_pac, cmd_about
+	cmd_ts, cmd_tdir, cmd_pac, cmd_about
 };
 
 /********************** shell codes ***************************/
@@ -118,10 +136,14 @@ cmd_func cmd_functions[] = {
 BOOL compare_cmd(const char* cmd) {
 	const char* pos = cmd;
 	int len = 0;
-	while(pos && len < cmd_size) {
-		if(current_cmd[len++] != *pos++) return FALSE;
+	int cmd_len = k_strlen(cmd);
+	while(*pos && len < cmd_size) {
+		if(current_cmd[len++] != *pos++) {
+			return FALSE;
+		}
 	}
-	return len == cmd_size && !*pos;
+	return *pos == '\0' ? current_cmd[len] == ' ' || len == cmd_size : 
+		len == cmd_len;
 }
 
 int get_cmd_code() {
@@ -136,12 +158,31 @@ int get_cmd_code() {
 	return SHELL_CMD_INVALID;
 }
 
+void process_param() {
+	cmd_param_size = 0;
+	int i = 0;
+	BOOL start_param = FALSE;
+	for(; i < cmd_size; ++i) {
+		if(!start_param && current_cmd[i] == ' ') {
+			start_param = TRUE;
+		} else if(start_param) {
+			if(current_cmd[i] != ' ') {
+				cmd_param[cmd_param_size++] = current_cmd[i];
+			} else {				
+				break;
+			}
+		}
+	}
+	cmd_param[cmd_param_size] = '\0';
+}
+
 void execute_cmd() {
 	wprintf(&shell_wnd, "\n");
 	int code = get_cmd_code();
-	if(SHELL_CMD_INVALID == code) 
+	process_param();
+	if(SHELL_CMD_INVALID == code) {
 		cmd_invalid();
-	else {
+	} else {
 		cmd_functions[code]();
 	}
 }
@@ -162,7 +203,7 @@ void shell_process(PROCESS self, PARAM param) {
 				wprintf(&shell_wnd, "%c", ch);
 			}
 		} else if(ch == 13) { /* return */
-			/* execute command */
+			/* execute command */			
 			execute_cmd();
 			cmd_size = 0;
 			wprintf(&shell_wnd, "> ");

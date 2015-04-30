@@ -38,20 +38,19 @@ BOOL probe(int number) {
 		return;
 	}
 
-	char probe_msg[5];
+	char probe_msg[4];
 	if (number >= 10) {
 		probe_msg[0] = 'C';
 		probe_msg[1] = '1';
 		probe_msg[2] = '0' + number % 10;
-		probe_msg[3] = '\015';
-		probe_msg[4] = '\0';
+		probe_msg[3] = '\0';
 	} else {
 		probe_msg[0] = 'C';
 		probe_msg[1] = '0' + number;
-		probe_msg[2] = '\015';
-		probe_msg[3] = '\0';
+		probe_msg[2] = '\0';
 	}
 
+	train_command("R");	
     return train_command(probe_msg);
 }
 
