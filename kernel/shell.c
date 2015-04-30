@@ -48,7 +48,6 @@ void print_helpers(WINDOW* wnd) {
 }
 
 void print_head(WINDOW* wnd) {
-	
 	wprintf(wnd, "  _____ ___  ___             |\n"); 
 	wprintf(wnd, " |_   _/ _ \\/ __|            |\n");
 	wprintf(wnd, "   | || (_) \\__ \\            |\n");
