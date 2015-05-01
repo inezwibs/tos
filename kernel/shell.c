@@ -11,6 +11,8 @@ char cmd_param[MAX_CMD_PARAM_LENGTH];
 int cmd_size = 0;
 int cmd_param_size = 0;
 
+extern BOOL train_running;
+
 /*Command codes*/
 #define SHELL_CMD_EMPTY   0
 #define SHELL_CMD_HELP    1
@@ -77,7 +79,11 @@ void cmd_ps() {
 }
 
 void cmd_train() {
-	init_train(&train_wnd);
+	if (!train_running) {
+		init_train(&train_wnd);
+	} else {
+        wprintf(&shell_wnd, "Sorry, the train process is running.\n");
+	}
 }
 
 void cmd_tstop() {
