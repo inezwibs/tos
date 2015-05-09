@@ -5,10 +5,12 @@ WINDOW* output_wnd = NULL;
 PORT train_port;
 BOOL train_running = FALSE;
 
+/* Some definitions of sleep params*/
 #define CMD_SLEEP_TIME 10
 #define CONFIG_4_LAST_SLEEP 420
 #define CHECK_ZAMBONI_SLEEP 50
 
+/* Config flag */
 #define TRAIN_CONFIG_1 0x0001
 #define TRAIN_CONFIG_2 0x0010
 #define TRAIN_CONFIG_3 0x0100
@@ -18,6 +20,7 @@ BOOL has_zamboni = FALSE;
 BOOL zamboni_dir_left = TRUE;
 unsigned short current_config = 0;
 
+/* Run train command via COM */
 BOOL train_command(const char* cmd) {
 	int len = k_strlen(cmd);
 	if (len >= 15) return FALSE;
@@ -45,16 +48,19 @@ BOOL train_command(const char* cmd) {
 	}
 }
 
+/* Wait until the contact[nb] is on/off */
 void wait_until_on_contact(int nb, BOOL on) {  
 	while (42) {
 		if(probe(nb) == on) return;
    	}
 }
 
+/* Clean train buffer */
 void clean_buffer() {
     train_command("R");
 }
 
+/* Change switch[#number] to color */
 void change_switch(int number, char color) {
 	if (number > 9 || number <= 0) {
 		wprintf(output_wnd, "Can't change switch, bad number!\n");
@@ -68,6 +74,7 @@ void change_switch(int number, char color) {
 	train_command(buf);
 }
 
+/* Probe the specifc number of contact */
 BOOL probe(int number) {
 	if (number > 16 || number <= 0) {
 		wprintf(output_wnd, "Can't probe, bad number!\n");
@@ -90,6 +97,7 @@ BOOL probe(int number) {
     return train_command(probe_msg);
 }
 
+/* Detect the running cofiguration and run strategy */
 int check_config() {
 	wprintf(output_wnd, "Checking the configuration...\n");
 
@@ -335,6 +343,7 @@ void train_process(PROCESS self, PARAM param) {
     resign();
 }
 
+/* Initialize the train application */
 void init_train(WINDOW* wnd) {
 	output_wnd = wnd;	
 	train_port = create_process(train_process, 3, 0, "Train Process");

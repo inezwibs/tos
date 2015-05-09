@@ -1,14 +1,22 @@
 #include <kernel.h>
 
+/* Window definitions */
 WINDOW shell_wnd = {0, 9, 61, 16, 0, 0, 0xDC};
 WINDOW pac_wnd = {61, 9, 61, 16, 0, 0, 0xDC};
 WINDOW train_wnd = {35, 0, 40, 8, 0, 0, ' '};
 
+/* Command buffer */
 #define MAX_CMD_LENGTH 32
-#define MAX_CMD_PARAM_LENGTH 5
 char current_cmd[MAX_CMD_LENGTH];
+
+/* Command parameter buffer */
+#define MAX_CMD_PARAM_LENGTH 5
 char cmd_param[MAX_CMD_PARAM_LENGTH];
+
+/* Length of the current command */
 int cmd_size = 0;
+
+/* Length of the current command parameter */
 int cmd_param_size = 0;
 
 extern BOOL train_running;
@@ -28,6 +36,7 @@ extern BOOL train_running;
 
 #define SHELL_CMD_INVALID 255
 
+/* Commands */
 const char* cmd_table[] = {
 	"help", "clear", "ps", "train", "tstop", 
 	"tgo", "ts","tdir", "pac", "about"
@@ -137,7 +146,7 @@ cmd_func cmd_functions[] = {
 };
 
 /********************** shell codes ***************************/
-
+/* Compare the "cmd" with current command buffer */
 BOOL compare_cmd(const char* cmd) {
 	const char* pos = cmd;
 	int len = 0;
@@ -151,6 +160,7 @@ BOOL compare_cmd(const char* cmd) {
 		len == cmd_len;
 }
 
+/* Get the code of the current command buffer */
 int get_cmd_code() {
 	if (0 == cmd_size) {
 		return SHELL_CMD_EMPTY;
@@ -163,6 +173,7 @@ int get_cmd_code() {
 	return SHELL_CMD_INVALID;
 }
 
+/* Process the shell parameter */
 void process_param() {
 	cmd_param_size = 0;
 	int i = 0;
@@ -181,6 +192,7 @@ void process_param() {
 	cmd_param[cmd_param_size] = '\0';
 }
 
+/* Execute command saved in command buffer */
 void execute_cmd() {
 	wprintf(&shell_wnd, "\n");
 	int code = get_cmd_code();
@@ -192,6 +204,7 @@ void execute_cmd() {
 	}
 }
 
+/* Entry function of shell process */
 void shell_process(PROCESS self, PARAM param) {
     char ch;
     Keyb_Message msg;
@@ -220,6 +233,7 @@ void shell_process(PROCESS self, PARAM param) {
 	}
 }
 
+/* Initialize the TOS shell */
 void init_shell() {
 	clear_window(kernel_window);
 	print_head(kernel_window);
